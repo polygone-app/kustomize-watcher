@@ -1,0 +1,79 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: kustomize-watcher
+    main: ./cmd/kustomize-watcher
+    binary: kustomize-watcher
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: "checksums.txt"
+
+dockers:
+  - id: amd64
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-amd64"
+      - "ghcr.io/polygone-app/kustomize-watcher:latest-amd64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/polygone-app/kustomize-watcher"
+
+  - id: arm64
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-arm64"
+      - "ghcr.io/polygone-app/kustomize-watcher:latest-arm64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/polygone-app/kustomize-watcher"
+
+docker_manifests:
+  - name_template: "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-amd64"
+      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-arm64"
+
+  - name_template: "ghcr.io/polygone-app/kustomize-watcher:latest"
+    image_templates:
+      - "ghcr.io/polygone-app/kustomize-watcher:latest-amd64"
+      - "ghcr.io/polygone-app/kustomize-watcher:latest-arm64"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
