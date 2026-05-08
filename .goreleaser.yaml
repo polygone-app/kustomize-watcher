@@ -32,43 +32,21 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
-dockers:
-  - id: amd64
-    goos: linux
-    goarch: amd64
-    image_templates:
-      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-amd64"
-      - "ghcr.io/polygone-app/kustomize-watcher:latest-amd64"
+dockers_v2:
+  - images:
+      - "ghcr.io/polygone-app/kustomize-watcher"
+    tags:
+      - "{{ .Tag }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
     dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.source=https://github.com/polygone-app/kustomize-watcher"
-
-  - id: arm64
-    goos: linux
-    goarch: arm64
-    image_templates:
-      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-arm64"
-      - "ghcr.io/polygone-app/kustomize-watcher:latest-arm64"
-    dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.source=https://github.com/polygone-app/kustomize-watcher"
-
-docker_manifests:
-  - name_template: "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}"
-    image_templates:
-      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-amd64"
-      - "ghcr.io/polygone-app/kustomize-watcher:{{ .Tag }}-arm64"
-
-  - name_template: "ghcr.io/polygone-app/kustomize-watcher:latest"
-    image_templates:
-      - "ghcr.io/polygone-app/kustomize-watcher:latest-amd64"
-      - "ghcr.io/polygone-app/kustomize-watcher:latest-arm64"
+    labels:
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.source: "https://github.com/polygone-app/kustomize-watcher"
+      org.opencontainers.image.created: "{{ .Date }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
 
 changelog:
   sort: asc
